@@ -19,7 +19,7 @@ class Book
 
 	#Implement tags
 	def htmlize()
-		return "Title: #{@title} Author: #{@author} #{@price} #{@url} #{@img}"
+		return "Title: #{@title} Author: #{@author} <br/> #{@price} <br/> <img src='#{@img}' /> <br/><a target='_blank' href='#{@url}'>#{@url}</a> </br>"
 	end
 end
 
@@ -29,7 +29,7 @@ def fetch_flipkart(booktitle)
 	lis = doc.search("/html/body/div/div/div[3]/div[@class='search_result_list']/div[@class='search_result_item']")
 	books = []
 	lis.each do |li|
-		img = li.search("div[@class='search_result_image']/a/img[@class='search_page_image']").to_s
+		img = li.search("div[@class='search_result_image']/a/img[@class='search_page_image']").first.attributes['src']
 		atag = li.search("div[@class='search_result_title']/a").first
 		url = "http://" + host + atag.attributes['href']
 		title = atag.search("h2/b/text()")
@@ -44,7 +44,7 @@ end
 def fetch_infibeam(booktitle)
 	host = "www.infibeam.com"
 	doc = get_doc(host, "/Books/search?q=" + booktitle)
-	lis = doc.search("/html/body/div/div[3]/div/div/div/div[2]/ul/li")
+	lis = doc.search("/html/body/div[@id='custom-doc']/div[@id='bd']/div/div/div/div[@id='search_result']/ul[@class='search_result']/li")
 	
 	#Handle cases where there are no results
 	# sort by price :D
@@ -53,12 +53,14 @@ def fetch_infibeam(booktitle)
 	lis.each do |li|
 		img = li.search("div[@class='img']/a/img").first.attributes['src']
 		author = li.search("span/a/text()").first
-		atag = li.search("span[@class='title']/h2/a").first
+		atag = li.search("h2[@class='simple']/a").first
+		if atag == nil
+			atag = li.search("span[@class='title']/h2[@class='simple']/a").first
+		end
 		url = "http://" + host + atag.attributes['href']
 		title = atag.search("text()").to_s
 		price = "Rs." + li.search("div[@class='price']/b/text()").to_s
 		b = Book.new(title, author, img, price, url)
-		#puts b.htmlize
 		books << b
 	end
 	return books
@@ -96,25 +98,49 @@ def get_doc(host, path)
 	return Hpricot(data)
 end
 
-if __FILE__ == $0
-	booktitle = ARGV[0].gsub(/ /, '+').downcase
-	puts "Searching for #{booktitle}..."
+def write(mes, f)
+	f.write(mes)
+end
 
-	puts "Flipkart.com"
+if __FILE__ == $0
+	title = ARGV[0]
+	if title == nil
+		puts "Usage: ruby book-search.rb booktitle  (Enclose in quotes if spaces present)"
+		exit
+	end
+
+	puts "Searching for #{title}..."
+	booktitle = title.gsub(/ /, '+').downcase
+	
+	file = File.open("search.html", "w")	
+	
+	write( "<h2>Flipkart.com</h2>", file)
 	flip = fetch_flipkart(booktitle)
 	flip.each do |f|
-		puts f.htmlize
+		write( "----------------------------------------<br/>", file)
+		write( f.htmlize, file)
 	end
 
-	puts "Bookadda.com"
+	write( "----------------------------------------<br/>", file)	
+	write( "<h2>Bookadda.com</h2>", file)
 	adda = fetch_bookadda(booktitle)
 	adda.each do |f|
-		puts f.htmlize
+		write( "----------------------------------------<br/>", file)
+		write( f.htmlize, file)
 	end
 
-	puts "Infibeam.com"
+	write( "----------------------------------------<br/>", file)
+	write( "<h2>Infibeam.com</h2>", file)
 	infi = fetch_infibeam(booktitle)
 	infi.each do |f|
-		puts f.htmlize
+		write( "----------------------------------------<br/>", file)
+		write( f.htmlize, file)
 	end
+	write( "----------------------------------------<br/>", file)
+	
+	puts "Results saved in search.html"
+	
+	system("search.html")
+	
+	file.close()
 end
