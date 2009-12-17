@@ -19,7 +19,7 @@ class Book
 
 	#Implement tags
 	def htmlize()
-		return "Title: #{@title} Author: #{@author} <br/> #{@price} <br/> <img src='#{@img}' /> <br/><a target='_blank' href='#{@url}'>#{@url}</a> </br>"
+		return "Title: <b> #{@title} </b> Author: #{@author} <br/> #{@price} <br/> <img src='#{@img}' /> <br/><a target='_blank' href='#{@url}'>#{@url}</a> </br>"
 	end
 end
 
@@ -102,6 +102,14 @@ def write(mes, f)
 	f.write(mes)
 end
 
+def display(bookstore, booktitle, results, file)
+	write(bookstore, file)
+	results.each do |f|
+		write( "----------------------------------------<br/>", file)
+		write( f.htmlize, file)
+	end
+end
+
 if __FILE__ == $0
 	title = ARGV[0]
 	if title == nil
@@ -113,31 +121,18 @@ if __FILE__ == $0
 	booktitle = title.gsub(/ /, '+').downcase
 	
 	file = File.open("search.html", "w")	
-	
-	write( "<h2>Flipkart.com</h2>", file)
+
 	flip = fetch_flipkart(booktitle)
-	flip.each do |f|
-		write( "----------------------------------------<br/>", file)
-		write( f.htmlize, file)
-	end
+	display("<h2>Flipkart.com</h2>", booktitle, flip, file)
 
-	write( "----------------------------------------<br/>", file)	
-	write( "<h2>Bookadda.com</h2>", file)
-	adda = fetch_bookadda(booktitle)
-	adda.each do |f|
-		write( "----------------------------------------<br/>", file)
-		write( f.htmlize, file)
-	end
-
-	write( "----------------------------------------<br/>", file)
-	write( "<h2>Infibeam.com</h2>", file)
 	infi = fetch_infibeam(booktitle)
-	infi.each do |f|
-		write( "----------------------------------------<br/>", file)
-		write( f.htmlize, file)
-	end
+	display("<h2>Infibeam.com</h2>", booktitle, infi, file)
+
+	adda = fetch_bookadda(booktitle)
+	display("<h2>Bookadda.com</h2>", booktitle, adda, file)
+
 	write( "----------------------------------------<br/>", file)
-	
+
 	puts "Results saved in search.html"
 	
 	system("search.html")
