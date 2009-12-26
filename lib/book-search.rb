@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'hpricot'
 require 'net/http'
 require 'uri'
@@ -25,6 +26,7 @@ end
 
 def fetch_flipkart(booktitle)
 	host = "www.flipkart.com"
+	puts "Searching Flipkart..."
 	doc = get_doc(host, "/search-books/" + booktitle)
 	lis = doc.search("/html/body/div/div/div[3]/div[@class='search_result_list']/div[@class='search_result_item']")
 	books = []
@@ -43,6 +45,7 @@ end
 
 def fetch_infibeam(booktitle)
 	host = "www.infibeam.com"
+	puts "Searching Infibeam..."
 	doc = get_doc(host, "/Books/search?q=" + booktitle)
 	lis = doc.search("/html/body/div[@id='custom-doc']/div[@id='bd']/div/div/div/div[@id='search_result']/ul[@class='search_result']/li")
 	
@@ -68,6 +71,7 @@ end
 
 def fetch_bookadda(booktitle)
 	host = "www.bookadda.com"
+	puts "Searching Bookadda..."
 	doc = get_doc(host, "/search/" + booktitle)
 	lis = doc.search("/html/body/form/div/div[3]/div[2]/div[@class='searchresultcontainer']")
 	
@@ -83,6 +87,31 @@ def fetch_bookadda(booktitle)
 			author << a.search("a/text()").to_s << ","
 		end
 		price = li.search("div[@class='searchresulthorizontal-rightcol']/ul/li/span[@class='boldtext ourpriceredtext']/text()")
+		b = Book.new(title, author, img, price, url)
+		books << b
+	end
+	return books
+end
+
+def fetch_indiaplaza(booktitle)
+	host = "www.indiaplaza.in"
+	puts "Searching Indiaplaza..."
+	doc = get_doc(host, "/search.aspx?catname=Books&srchkey=title&srchVal=" + booktitle)
+	
+	lis = doc.search("/html/body/form[@name='aspnetForm']/div[@id='ctl00_mPageMaster']/div/table/tr[2]/td[4]/div[@id='ctl00_CPMiddle_srchItemsDiv']/span[@id='ctl00_CPMiddle_BookItems_Datalis1']/span/div[@class='bline']/table/tr")
+	
+	books = []
+	lis.each do |li|
+		img = li.search("td/a/img").first.attributes['src']
+		atag = li.search("td[2]/div/h1[@class='h5copy']/a").first
+		url = "http://" + host + atag.attributes['href']
+		title = atag.search("strong/text()")
+		authors = li.search("td/div/div/span[@class='copy']/div/span[@class='copy']/h1[@class='h5copy']/a")
+		author = ""
+		authors.each do |a|
+			author << a.inner_text << ","
+		end
+		price = li.search("td[3]/div/span[@class='detailcaps']/span[@class='copy']/strong/text()")
 		b = Book.new(title, author, img, price, url)
 		books << b
 	end
@@ -131,11 +160,12 @@ if __FILE__ == $0
 	adda = fetch_bookadda(booktitle)
 	display("<h2>Bookadda.com</h2>", booktitle, adda, file)
 
+	indi = fetch_indiaplaza(booktitle)
+	display("<h2>Indiaplaza.in</h2>", booktitle, indi, file)
+
 	write( "----------------------------------------<br/>", file)
 
 	puts "Results saved in search.html"
-	
-	system("search.html")
 	
 	file.close()
 end
