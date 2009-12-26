@@ -1,0 +1,23 @@
+= Book-Search - Search online bookstores
+
+== An Overview
+Book-Search is a ruby script to search multiple online bookstores in India. The original aim of this project was to find
+the lowest price among all the stores. The current script just displays the results with prices and links to the sites.
+Price-based listing is on the way!
+
+== Supported sites
+
+* Bookadda.com
+* Infibeam.com
+* Flipkart.com
+* Indiaplaza.in
+
+== Dependencies
+
+Book-search uses the Hpricot HTML parser. http://github.com/whymirror/hpricot
+
+The script uses screen scraping - so it's totally dependent on the stores' site's search results page structure. It'll break if the latter changes.
+
+== Immediate ToDos
+* Price based rankings, with lowest on top.
+* Split the code into separate modules, so that bookstores can be added and removed easily.
