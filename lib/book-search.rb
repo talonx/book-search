@@ -118,6 +118,28 @@ def fetch_indiaplaza(booktitle)
 	return books
 end
 
+def fetch_storez(booktitle)
+	host = "www.thestorez.com"
+	puts "Searching TheStorez..."
+	doc = get_doc(host, "/catalogsearch/result/?q=" + booktitle)
+	
+	#The listing-item class name has a trailing space
+	lis = doc.search("/html/body/div[2]/div/div/div[@class='listing-type-list catalog-listing']/div[@class='listing-item ']")
+	
+	books = []
+	lis.each do |li|
+		img = li.search("table/tr/td[2]/div[@class='product-image']/a/img").first.attributes['src']
+		atag = li.search("table/tr/td[3]/div[@class='product-shop']/table/tr/td/h5/a").first
+		url = atag.attributes['href']
+		title = atag.search("/text()")
+		authors = li.search("table/tr/td[3]/div[@class='product-shop']/table/tr[2]/td/b[1]/text()")
+		price = li.search("table/tr/td[3]/div/table/tr[2]/td[2]/div[@class='price-box']/span[@class='special-price']/span[@class=''price]/span[@class='nobr']/text()")
+		b = Book.new(title, authors, img, price, url)
+		books << b
+	end
+	return books
+end
+
 def get_doc(host, path)
 	#Handle redirects here
 	h = Net::HTTP.new(host)
@@ -160,9 +182,12 @@ if __FILE__ == $0
 	adda = fetch_bookadda(booktitle)
 	display("<h2>Bookadda.com</h2>", booktitle, adda, file)
 
+	storez = fetch_storez(booktitle)
+	display("<h2>TheStorez.com</h2>", booktitle, storez, file)
+
 	indi = fetch_indiaplaza(booktitle)
 	display("<h2>Indiaplaza.in</h2>", booktitle, indi, file)
-
+	
 	write( "----------------------------------------<br/>", file)
 
 	puts "Results saved in search.html"
