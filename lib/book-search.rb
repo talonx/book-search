@@ -185,8 +185,8 @@ if __FILE__ == $0
 	storez = fetch_storez(booktitle)
 	display("<h2>TheStorez.com</h2>", booktitle, storez, file)
 
-	indi = fetch_indiaplaza(booktitle)
-	display("<h2>Indiaplaza.in</h2>", booktitle, indi, file)
+#	indi = fetch_indiaplaza(booktitle)
+#	display("<h2>Indiaplaza.in</h2>", booktitle, indi, file)
 	
 	write( "----------------------------------------<br/>", file)
 
