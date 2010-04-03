@@ -10,6 +10,6 @@ class Result
 
 	private
 	def sort(books)
-		books
+		books.sort_by { |b| b.price }
 	end
 end

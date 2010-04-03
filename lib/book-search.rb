@@ -33,7 +33,7 @@ class BookSearch
 			atag = li.search("div[@class='search_result_title']/a").first
 			url = "http://" + host + atag.attributes['href']
 			title = atag.search("h2/b/text()")
-			price = li.search("div[@class='search_result_item_summary']/div[@class='search_result_item_info']/span[@class='search_results_price']/font/b/text()")
+			price = li.search("div[@class='search_result_item_summary']/div[@class='search_result_item_info']/span[@class='search_results_price']/font/b/text()").first.to_s
 			author = li.search("div[@class='search_result_title']/span[@class='search_page_title_author']/a/b/text()")
 			b = Book.new(title, author, img, price, url)
 			books << b
@@ -60,7 +60,7 @@ class BookSearch
 			end
 			url = "http://" + host + atag.attributes['href']
 			title = atag.search("text()").to_s
-			price = "Rs." + li.search("div[@class='price']/b/text()").to_s
+			price = li.search("div[@class='price']/b/text()").first.to_s
 			b = Book.new(title, author, img, price, url)
 			books << b
 		end
@@ -84,7 +84,7 @@ class BookSearch
 			authors.each do |a|
 				author << a.search("a/text()").to_s << ","
 			end
-			price = li.search("div[@class='searchresulthorizontal-rightcol']/ul/li/span[@class='boldtext ourpriceredtext']/text()")
+			price = li.search("div[@class='searchresulthorizontal-rightcol']/ul/li/span[@class='boldtext ourpriceredtext']/text()").first.to_s
 			b = Book.new(title, author, img, price, url)
 			books << b
 		end
@@ -109,7 +109,7 @@ class BookSearch
 			authors.each do |a|
 				author << a.inner_text << ","
 			end
-			price = li.search("td[3]/div/span[@class='detailcaps']/span[@class='copy']/strong/text()")
+			price = li.search("td[3]/div/span[@class='detailcaps']/span[@class='copy']/strong/text()").first.to_s
 			b = Book.new(title, author, img, price, url)
 			books << b
 		end
@@ -131,7 +131,7 @@ class BookSearch
 			url = atag.attributes['href']
 			title = atag.search("/text()")
 			authors = li.search("table/tr/td[3]/div[@class='product-shop']/table/tr[2]/td/b[1]/text()")
-			price = li.search("table/tr/td[3]/div/table/tr[2]/td[2]/div[@class='price-box']/span[@class='special-price']/span[@class=''price]/span[@class='nobr']/text()")
+			price = li.search("table/tr/td[3]/div/table/tr[2]/td[2]/div[@class='price-box']/span[@class='special-price']/span[@class=''price]/span[@class='nobr']/text()").first.to_s
 			b = Book.new(title, authors, img, price, url)
 			books << b
 		end
