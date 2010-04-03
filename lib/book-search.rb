@@ -10,7 +10,7 @@ class BookSearch
 #	attr_accessor: @booktitle
 
 	def initialize(booktitle)
-		@booktitle = booktitle.gsub(/ /, '+').downcase
+		@booktitle = booktitle
 	end
 
 	def searchbooks
@@ -19,10 +19,12 @@ class BookSearch
 		adda = Result.new('bookadda', fetch_bookadda(@booktitle))
 		storez = Result.new('thestorez', fetch_storez(@booktitle))
 		return [flip, infi, adda, storez]
+#		return [flip]
 	end
 
 	private
-	def fetch_flipkart(booktitle)
+	def fetch_flipkart(otitle)
+		booktitle = otitle.gsub(/ /, '+').downcase
 		host = "www.flipkart.com"
 		puts "Searching Flipkart..."
 		doc = get_doc(host, "/search-books/" + booktitle)
@@ -32,7 +34,10 @@ class BookSearch
 			img = li.search("div[@class='search_result_image']/a/img[@class='search_page_image']").first.attributes['src']
 			atag = li.search("div[@class='search_result_title']/a").first
 			url = "http://" + host + atag.attributes['href']
-			title = atag.search("h2/b/text()")
+			title = li.search("div[@class='search_result_title']/h2/b/text()").to_s
+			if (title.downcase.index(otitle) == nil)
+				next
+			end
 			price = li.search("div[@class='search_result_item_summary']/div[@class='search_result_item_info']/span[@class='search_results_price']/font/b/text()").first.to_s
 			author = li.search("div[@class='search_result_title']/span[@class='search_page_title_author']/a/b/text()")
 			b = Book.new(title, author, img, price, url)
@@ -41,7 +46,8 @@ class BookSearch
 		return books
 	end
 
-	def fetch_infibeam(booktitle)
+	def fetch_infibeam(otitle)
+		booktitle = otitle.gsub(/ /, '+').downcase
 		host = "www.infibeam.com"
 		puts "Searching Infibeam..."
 		doc = get_doc(host, "/Books/search?q=" + booktitle)
@@ -60,6 +66,9 @@ class BookSearch
 			end
 			url = "http://" + host + atag.attributes['href']
 			title = atag.search("text()").to_s
+			if (title.downcase.index(otitle) == nil)
+				next
+			end
 			price = li.search("div[@class='price']/b/text()").first.to_s
 			b = Book.new(title, author, img, price, url)
 			books << b
@@ -67,7 +76,8 @@ class BookSearch
 		return books
 	end
 
-	def fetch_bookadda(booktitle)
+	def fetch_bookadda(otitle)
+		booktitle = otitle.gsub(/ /, '+').downcase
 		host = "www.bookadda.com"
 		puts "Searching Bookadda..."
 		doc = get_doc(host, "/search/" + booktitle)
@@ -78,7 +88,10 @@ class BookSearch
 			img = li.search("div[@class='searchresulthorizontal-leftcol']/div[@class='img']/a/img").first.attributes['src']
 			atag = li.search("div[@class='searchresulthorizontal-leftcol']/div[@class='searchpagecontentcol']/div[@class='searchpagebooktitle']/a").first
 			url = atag.attributes['href']
-			title = atag.search("h2/text()")
+			title = atag.search("h2/text()").to_s
+	                if (title.downcase.index(otitle) == nil)
+                                next
+                        end
 			authors = li.search("div[@class='searchresulthorizontal-leftcol']/div[@class='searchpagecontentcol']/div[@class='searchbookauthor']/span[@class='underline']")
 			author = ""
 			authors.each do |a|
@@ -91,7 +104,8 @@ class BookSearch
 		return books
 	end
 
-	def fetch_indiaplaza(booktitle)
+	def fetch_indiaplaza(otitle)
+		booktitle = otitle.gsub(/ /, '+').downcase
 		host = "www.indiaplaza.in"
 		puts "Searching Indiaplaza..."
 		doc = get_doc(host, "/search.aspx?catname=Books&srchkey=title&srchVal=" + booktitle)
@@ -103,7 +117,11 @@ class BookSearch
 			img = li.search("td/a/img").first.attributes['src']
 			atag = li.search("td[2]/div/h1[@class='h5copy']/a").first
 			url = "http://" + host + atag.attributes['href']
-			title = atag.search("strong/text()")
+			title = atag.search("strong/text()").to_s
+	                if (title.downcase.index(otitle) == nil)
+                                next
+                        end
+
 			authors = li.search("td/div/div/span[@class='copy']/div/span[@class='copy']/h1[@class='h5copy']/a")
 			author = ""
 			authors.each do |a|
@@ -116,7 +134,8 @@ class BookSearch
 		return books
 	end
 
-	def fetch_storez(booktitle)
+	def fetch_storez(otitle)
+		booktitle = otitle.gsub(/ /, '+').downcase
 		host = "www.thestorez.com"
 		puts "Searching TheStorez..."
 		doc = get_doc(host, "/catalogsearch/result/?q=" + booktitle)
@@ -129,7 +148,11 @@ class BookSearch
 			img = li.search("table/tr/td[2]/div[@class='product-image']/a/img").first.attributes['src']
 			atag = li.search("table/tr/td[3]/div[@class='product-shop']/table/tr/td/h5/a").first
 			url = atag.attributes['href']
-			title = atag.search("/text()")
+			title = atag.search("/text()").to_s
+	                if (title.downcase.index(otitle) == nil)
+                                next
+                        end
+
 			authors = li.search("table/tr/td[3]/div[@class='product-shop']/table/tr[2]/td/b[1]/text()")
 			price = li.search("table/tr/td[3]/div/table/tr[2]/td[2]/div[@class='price-box']/span[@class='special-price']/span[@class=''price]/span[@class='nobr']/text()").first.to_s
 			b = Book.new(title, authors, img, price, url)
