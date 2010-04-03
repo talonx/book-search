@@ -2,8 +2,8 @@ require 'rubygems'
 require 'hpricot'
 require 'net/http'
 require 'uri'
-require 'book.rb'
-require 'result.rb'
+require File.dirname(__FILE__) + '/../lib/book.rb'
+require File.dirname(__FILE__) + '/../lib/result.rb'
 
 class BookSearch
 	
@@ -24,7 +24,8 @@ class BookSearch
 
 	private
 	def fetch_flipkart(otitle)
-		booktitle = otitle.gsub(/ /, '+').downcase
+		otitle = otitle.downcase
+		booktitle = otitle.gsub(/ /, '+')
 		host = "www.flipkart.com"
 		puts "Searching Flipkart..."
 		doc = get_doc(host, "/search-books/" + booktitle)
@@ -36,6 +37,7 @@ class BookSearch
 			url = "http://" + host + atag.attributes['href']
 			title = li.search("div[@class='search_result_title']/h2/b/text()").to_s
 			if (title.downcase.index(otitle) == nil)
+				puts "skipping as bad match"
 				next
 			end
 			price = li.search("div[@class='search_result_item_summary']/div[@class='search_result_item_info']/span[@class='search_results_price']/font/b/text()").first.to_s
@@ -47,7 +49,8 @@ class BookSearch
 	end
 
 	def fetch_infibeam(otitle)
-		booktitle = otitle.gsub(/ /, '+').downcase
+		otitle = otitle.downcase
+		booktitle = otitle.gsub(/ /, '+')
 		host = "www.infibeam.com"
 		puts "Searching Infibeam..."
 		doc = get_doc(host, "/Books/search?q=" + booktitle)
@@ -77,7 +80,8 @@ class BookSearch
 	end
 
 	def fetch_bookadda(otitle)
-		booktitle = otitle.gsub(/ /, '+').downcase
+		otitle = otitle.downcase
+		booktitle = otitle.gsub(/ /, '+')
 		host = "www.bookadda.com"
 		puts "Searching Bookadda..."
 		doc = get_doc(host, "/search/" + booktitle)
@@ -105,7 +109,8 @@ class BookSearch
 	end
 
 	def fetch_indiaplaza(otitle)
-		booktitle = otitle.gsub(/ /, '+').downcase
+		otitle = otitle.downcase
+		booktitle = otitle.gsub(/ /, '+')
 		host = "www.indiaplaza.in"
 		puts "Searching Indiaplaza..."
 		doc = get_doc(host, "/search.aspx?catname=Books&srchkey=title&srchVal=" + booktitle)
@@ -135,7 +140,8 @@ class BookSearch
 	end
 
 	def fetch_storez(otitle)
-		booktitle = otitle.gsub(/ /, '+').downcase
+		otitle = otitle.downcase
+		booktitle = otitle.gsub(/ /, '+')
 		host = "www.thestorez.com"
 		puts "Searching TheStorez..."
 		doc = get_doc(host, "/catalogsearch/result/?q=" + booktitle)
@@ -165,7 +171,6 @@ class BookSearch
 		#Handle redirects here
 		h = Net::HTTP.new(host)
 		resp, data = h.get(path, nil)
-		
 		data = data.gsub(/\r|\n/, '')
 		return Hpricot(data)
 	end
